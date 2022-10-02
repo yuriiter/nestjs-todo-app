@@ -1,0 +1,44 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model TodoList {
+  id            Int            @id @default(autoincrement())
+  name          String
+  owners        User[]
+  todoListItems TodoListItem[]
+  createdAt     DateTime       @default(now())
+}
+
+model TodoListItem {
+  id         Int      @id @default(autoincrement())
+  title      String
+  freeText   String
+  deadline   DateTime
+  createdAt  DateTime @default(now())
+  todoList   TodoList @relation(fields: [todoListId], references: [id])
+  todoListId Int
+  flag       Flag     @default(ACTIVE)
+}
+
+model User {
+  id           Int        @id @default(autoincrement())
+  email        String     @unique
+  passwordHash String
+  todoLists    TodoList[]
+  registeredAt DateTime   @default(now())
+}
+
+enum Flag {
+  ACTIVE
+  FINISHED
+  CANCELLED
+}
