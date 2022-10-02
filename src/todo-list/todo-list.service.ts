@@ -10,101 +10,121 @@ export class TodoListService {
   constructor(private prismaService: PrismaService) {}
 
   async create(todoList: TodoListDto, userId: number) {
-    const findUser = await this.prismaService.user.findUnique({
-      where: {
-        id: userId,
-      },
-    });
-    const newTodoList = await this.prismaService.todoList.create({
-      data: {
-        name: todoList.name,
-        owners: {
-          connect: {
-            id: findUser.id,
-          },
-        },
-      },
-    });
-  }
-
-  async getAllByUser(userId: number) {
-    const todoLists = await this.prismaService.user
-      .findUnique({
+    try {
+      const findUser = await this.prismaService.user.findUnique({
         where: {
           id: userId,
         },
-      })
-      .todoLists({
-        include: {
-          todoListItems: true,
+      });
+      const newTodoList = await this.prismaService.todoList.create({
+        data: {
+          name: todoList.name,
+          owners: {
+            connect: {
+              id: findUser.id,
+            },
+          },
         },
       });
-    return todoLists;
+    } catch (error) {
+      throw new BadRequestException("Invalid parameters");
+    }
   }
 
-  async getById(todoListId: number) {
-    const todoList = await this.prismaService.todoList.findUnique({
-      where: {
-        id: todoListId,
-      },
-      include: {
-        todoListItems: true,
-      },
-    });
-    return todoList;
-  }
-
-  async addUser(todoListId: number, userId: number) {
-    const todoList = await this.prismaService.todoList.update({
-      where: {
-        id: todoListId,
-      },
-      data: {
-        owners: {
-          connect: [
-            {
-              id: userId,
-            },
-          ],
-        },
-      },
-    });
-
-    return todoList;
-  }
-
-  async delete(todoListId: number, userId: number) {
+  async getAllByUser(userId: number) {
     try {
-      const todoList = await this.prismaService.user
+      const todoLists = await this.prismaService.user
         .findUnique({
           where: {
             id: userId,
           },
-          select: {
-            todoLists: true,
-          },
         })
         .todoLists({
-          where: {
-            id: todoListId,
+          include: {
+            todoListItems: true,
           },
         });
+      return todoLists;
+    } catch (error) {
+      throw new BadRequestException("Invalid parameters");
+    }
+  }
 
-      await this.prismaService.todoListItem.deleteMany({
-        where: {
-          todoListId: todoListId,
-        },
-      });
-      await this.prismaService.todoList.delete({
+  async getById(todoListId: number) {
+    try {
+      const todoList = await this.prismaService.todoList.findUnique({
         where: {
           id: todoListId,
+        },
+        include: {
+          todoListItems: true,
         },
       });
       return todoList;
     } catch (error) {
-      if (error instanceof NotFoundError) {
-        throw new BadRequestException("Invalid todo list");
+      throw new BadRequestException("Invalid parameters");
+    }
+  }
+
+  async addUser(todoListId: number, userId: number) {
+    try {
+      const todoList = await this.prismaService.todoList.update({
+        where: {
+          id: todoListId,
+        },
+        data: {
+          owners: {
+            connect: [
+              {
+                id: userId,
+              },
+            ],
+          },
+        },
+      });
+
+      return todoList;
+    } catch (error) {
+      throw new BadRequestException("Invalid parameters");
+    }
+  }
+
+  async delete(todoListId: number, userId: number) {
+    try {
+      try {
+        const todoList = await this.prismaService.user
+          .findUnique({
+            where: {
+              id: userId,
+            },
+            select: {
+              todoLists: true,
+            },
+          })
+          .todoLists({
+            where: {
+              id: todoListId,
+            },
+          });
+
+        await this.prismaService.todoListItem.deleteMany({
+          where: {
+            todoListId: todoListId,
+          },
+        });
+        await this.prismaService.todoList.delete({
+          where: {
+            id: todoListId,
+          },
+        });
+        return todoList;
+      } catch (error) {
+        if (error instanceof NotFoundError) {
+          throw new BadRequestException("Invalid todo list");
+        }
       }
+    } catch (error) {
+      throw new BadRequestException("Invalid parameters");
     }
   }
 
@@ -145,10 +165,14 @@ export class TodoListService {
   }
 
   async getAll() {
-    return await this.prismaService.todoList.findMany({
-      include: {
-        todoListItems: true,
-      },
-    });
+    try {
+      return await this.prismaService.todoList.findMany({
+        include: {
+          todoListItems: true,
+        },
+      });
+    } catch (error) {
+      throw new BadRequestException("Invalid parameters");
+    }
   }
 }

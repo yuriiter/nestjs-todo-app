@@ -7,37 +7,41 @@ export class TodoListItemService {
   constructor(private prismaService: PrismaService) {}
 
   async changeStatus(userId: number, id: number, flag: Flag) {
-    const todoLists = await this.prismaService.user
-      .findUnique({
+    try {
+      const todoLists = await this.prismaService.user
+        .findUnique({
+          where: {
+            id: userId,
+          },
+        })
+        .todoLists({
+          include: {
+            todoListItems: true,
+          },
+        });
+
+      const todoListItemExists = todoLists.find((todoList) => {
+        const todoListItems = todoList.todoListItems;
+        const searchedItem = todoListItems.find((todoListItem) => {
+          return todoListItem.id === id;
+        });
+        return searchedItem;
+      });
+
+      if (!todoListItemExists) {
+        throw new BadRequestException("Invalid user or item id");
+      }
+
+      return await this.prismaService.todoListItem.update({
         where: {
-          id: userId,
+          id: id,
         },
-      })
-      .todoLists({
-        include: {
-          todoListItems: true,
+        data: {
+          flag: flag,
         },
       });
-
-    const todoListItemExists = todoLists.find((todoList) => {
-      const todoListItems = todoList.todoListItems;
-      const searchedItem = todoListItems.find((todoListItem) => {
-        return todoListItem.id === id;
-      });
-      return searchedItem;
-    });
-
-    if (!todoListItemExists) {
-      throw new BadRequestException("Invalid user or item id");
+    } catch (error) {
+      throw new BadRequestException("Invalid parameters");
     }
-
-    return await this.prismaService.todoListItem.update({
-      where: {
-        id: id,
-      },
-      data: {
-        flag: flag,
-      },
-    });
   }
 }
