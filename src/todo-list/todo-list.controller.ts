@@ -43,7 +43,6 @@ export class TodoListController {
     @Body() todoListItemDto: TodoListItemDto,
     @Req() req,
   ) {
-    console.log("fdsafjasdlj");
     return this.todoListService.addNewTodoListItem(
       req.user.id,
       validateNumber(todoListId),
