@@ -18,9 +18,13 @@ export class TodoListItemService {
           todoListItems: true,
         },
       });
+
     const todoListItemExists = todoLists.find((todoList) => {
       const todoListItems = todoList.todoListItems;
-      return todoListItems.find((todoListItem) => todoListItem.id === id);
+      const searchedItem = todoListItems.find((todoListItem) => {
+        return todoListItem.id === id;
+      });
+      return searchedItem;
     });
 
     if (!todoListItemExists) {
