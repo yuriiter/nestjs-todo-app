@@ -1,0 +1,186 @@
+openapi: 3.0.0
+info:
+  title: Todo list app
+  description: Todo list app API description
+  contact: {}
+  version: "1.0"
+servers:
+- url: /
+tags:
+- name: NestJS Todo API
+  description: ""
+paths:
+  /auth/signin:
+    post:
+      operationId: AuthController_postLogin
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthDto'
+        required: true
+      responses:
+        "201":
+          description: "Sign in endpoint which returns an access token that must be\
+            \ inserted to Authorization header in format: \"Bearer [token]\""
+        "400":
+          description: Bad credentials
+      x-swagger-router-controller: Default
+  /auth/signup:
+    post:
+      operationId: AuthController_postSignup
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthDto'
+        required: true
+      responses:
+        "201":
+          description: Sign up endpoint
+        "400":
+          description: Invalid parameters or user exists
+      x-swagger-router-controller: Default
+  /todo-lists:
+    get:
+      operationId: TodoListController_getAll
+      parameters:
+      - name: user-id
+        in: query
+        required: false
+        style: form
+        explode: true
+        schema:
+          type: number
+      responses:
+        "200":
+          description: Get all existing todo lists or owned by a certain user
+      x-swagger-router-controller: Default
+    post:
+      operationId: TodoListController_create
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TodoListDto'
+        required: true
+      responses:
+        "201":
+          description: Create a todo list
+      x-swagger-router-controller: Default
+  /todo-lists/{id}:
+    get:
+      operationId: TodoListController_getById
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: number
+      responses:
+        "200":
+          description: Get a todo list with all nested items
+      x-swagger-router-controller: Default
+    delete:
+      operationId: TodoListController_delete
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: number
+      responses:
+        "200":
+          description: Delete a todo list with all nested items
+      x-swagger-router-controller: Default
+  /todo-lists/{todoListId}/todo-list-items:
+    post:
+      operationId: TodoListController_addNewTodoListItem
+      parameters:
+      - name: todoListId
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: number
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TodoListItemDto'
+        required: true
+      responses:
+        "201":
+          description: Create a todo list item and add it to a todo list
+      x-swagger-router-controller: Default
+  /todo-list-items/{id}:
+    put:
+      operationId: TodoListItemController_changeStatus
+      parameters:
+      - name: id
+        in: path
+        required: true
+        style: simple
+        explode: false
+        schema:
+          type: number
+      responses:
+        "200":
+          description: Chane status of a certain todo list item
+      x-swagger-router-controller: Default
+  /users/me:
+    get:
+      operationId: UserController_getMe
+      parameters: []
+      responses:
+        "200":
+          description: Get information about a signed in user
+      x-swagger-router-controller: Default
+  /users:
+    get:
+      operationId: UserController_getAll
+      parameters: []
+      responses:
+        "200":
+          description: Get a list of all signed up users
+      x-swagger-router-controller: Default
+components:
+  schemas:
+    AuthDto:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          maxLength: 15
+          minLength: 3
+          type: string
+    TodoListDto:
+      type: object
+      properties:
+        name:
+          type: string
+    TodoListItemDto:
+      type: object
+      properties:
+        title:
+          type: string
+        freeText:
+          type: string
+        deadLine:
+          type: string
+          format: date-time
+        flag:
+          type: string
+          enum:
+          - ACTIVE
+          - FINISHED
+          - CANCELLED
