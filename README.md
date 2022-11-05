@@ -2,8 +2,6 @@
 
  <p align="center">
     Backend made with NestJS
-    <br />
-    <a href="https://app.swaggerhub.com/apis/yurii.tereshchenko/todo-list_app/1.0#/"><strong>Explore the docs »</strong></a>
   </p>
 
 
