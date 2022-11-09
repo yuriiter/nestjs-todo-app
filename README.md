@@ -9,7 +9,7 @@
 
 This project was build using these technologies:
 
-* NextJS
+* NestJS
 * TypeScript
 * Prisma
 * PostgreSQL
